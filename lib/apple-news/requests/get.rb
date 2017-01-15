@@ -5,7 +5,7 @@ module AppleNews
 
       def initialize(url)
         @config = AppleNews.config
-        @url = URI::parse(File.join(@config.api_base, url))
+        @url = URI.parse(File.join(@config.api_base, url))
       end
 
       def call(params = {})
