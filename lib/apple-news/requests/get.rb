@@ -13,11 +13,27 @@ module AppleNews
         http.use_ssl = true
         http.verify_mode = OpenSSL::SSL::VERIFY_PEER
 
+        add_query_string_to @url, params: params, key: :page_size
+
         res = http.get(@url, headers)
         JSON.parse(res.body)
       end
 
       private
+
+      def add_query_string_to(url, params:, key:)
+        return unless params.key?(key)
+
+        url.query = URI.encode_www_form(camel_cased(key) => params[key])
+      end
+
+      def camel_cased key
+        key.to_s.camelize(:lower)
+      end
+
+      def encoded(query)
+        URI.encode_www_form(query)
+      end
 
       def headers
         security = AppleNews::Security.new('GET', @url.to_s)
