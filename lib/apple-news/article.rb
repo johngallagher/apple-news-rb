@@ -1,5 +1,6 @@
 require 'apple-news/article/attachments'
 require 'apple-news/article/persistence'
+require 'forwardable'
 
 module AppleNews
   class Article
