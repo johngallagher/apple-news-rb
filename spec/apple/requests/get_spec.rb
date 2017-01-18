@@ -30,6 +30,17 @@ describe AppleNews::Request::Get do
     end
   end
 
+  context 'when asking for page token' do
+    it 'passes the pageSize via the query string' do
+      stub_articles_api(
+        with_query: { 'pageToken' => 'abc' },
+        to_return: article_data.to_json
+      )
+      response = request.call(page_token: 'abc')
+      expect(response).to eq(article_data)
+    end
+  end
+
   context 'when asking for articles sorted by newest first' do
     it 'passes the sortDir via the query string' do
       stub_articles_api(

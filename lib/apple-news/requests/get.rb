@@ -13,7 +13,7 @@ module AppleNews
         http.use_ssl = true
         http.verify_mode = OpenSSL::SSL::VERIFY_PEER
 
-        add_query_string_to @url, params: params, fields: [:page_size, :sort_dir]
+        add_query_string_to @url, params: params, fields: [:page_size, :sort_dir, :page_token]
 
         res = http.get(@url, headers)
         JSON.parse(res.body)
