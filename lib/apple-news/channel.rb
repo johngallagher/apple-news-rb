@@ -7,12 +7,12 @@ module AppleNews
                 :default_section, :share_url
 
     def self.current
-      self.new(AppleNews.config.channel_id)
+      new(AppleNews.config.channel_id)
     end
 
     def initialize(id, data = nil)
       @id = id
-      @resource_path = "/channels"
+      @resource_path = '/channels'
 
       data.nil? ? hydrate! : set_read_only_properties(data)
     end
@@ -30,11 +30,36 @@ module AppleNews
     end
 
     def articles(params = {})
+      articles = []
+
+      page = get_page(params)
+      articles += page[:results]
+
+      while page[:next_page]
+        page = get_page(params.merge(page_token: page[:next_page]))
+        articles += page[:results]
+      end
+
+      sorted_articles = articles.sort_by { |article| Date.parse(article.document.metadata['datePublished']) }
+      sorted_articles.reverse! if params[:sort_dir].to_s.casecmp('desc').zero?
+      sorted_articles
+    end
+
+    def get_page(params = {})
       request = Request::Get.new("/channels/#{id}/articles")
-      resp = request.call(params)
-      resp['data'].map do |article|
+      response = request.call(params)
+      results = response['data'].map do |article|
         Article.new(article['id'])
       end
+
+      {
+        results: results,
+        next_page: next_page_token(response)
+      }
+    end
+
+    def next_page_token(response)
+      response['meta'] && response['meta']['nextPageToken']
     end
   end
 end
