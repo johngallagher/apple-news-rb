@@ -24,7 +24,7 @@ module AppleNews
       def add_query_string_to(url, params:, key:)
         return unless params.key?(key)
 
-        url.query = URI.encode_www_form(camel_cased(key) => params[key])
+        url.query = encoded(camel_cased(key) => params[key])
       end
 
       def camel_cased key
