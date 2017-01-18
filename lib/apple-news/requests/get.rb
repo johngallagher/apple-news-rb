@@ -13,7 +13,7 @@ module AppleNews
         http.use_ssl = true
         http.verify_mode = OpenSSL::SSL::VERIFY_PEER
 
-        add_query_string_to @url, params: params, key: :page_size
+        add_query_string_to @url, params: params, fields: [:page_size, :sort_dir]
 
         res = http.get(@url, headers)
         JSON.parse(res.body)
@@ -21,10 +21,24 @@ module AppleNews
 
       private
 
-      def add_query_string_to(url, params:, key:)
-        return unless params.key?(key)
+      def add_query_string_to(url, params:, fields:)
+        active_fields = params.keys & fields
+        url.query = encoded(query params: params, fields: active_fields) if active_fields.any?
+      end
 
-        url.query = encoded(camel_cased(key) => params[key])
+      def query params:, fields:
+        fields.inject({}) do |query, field|
+          query.merge(camel_cased(field) => extract(field, from: params))
+        end
+      end
+
+      def extract field, from:
+        query_value = from[field]
+        if query_value.is_a? Symbol
+          query_value.to_s.upcase 
+        else
+          query_value
+        end
       end
 
       def camel_cased key

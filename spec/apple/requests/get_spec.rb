@@ -8,7 +8,7 @@ describe AppleNews::Request::Get do
     AppleNews.config.api_key_secret = 'miJAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='
   end
 
-  context 'when asking for articles without any pageSize parameter' do
+  context 'no query passed in' do
     it 'sends no query string' do
       stub_articles_api(
         with_query: {},
@@ -26,6 +26,26 @@ describe AppleNews::Request::Get do
         to_return: article_data.to_json
       )
       response = request.call(page_size: 100)
+      expect(response).to eq(article_data)
+    end
+  end
+
+  context 'when asking for articles sorted by newest first' do
+    it 'passes the sortDir via the query string' do
+      stub_articles_api(
+        with_query: { 'sortDir' => 'DESC' },
+        to_return: article_data.to_json
+      )
+      response = request.call(sort_dir: 'DESC')
+      expect(response).to eq(article_data)
+    end
+
+    it 'capitalizes the sort dir parameter' do
+      stub_articles_api(
+        with_query: { 'sortDir' => 'DESC' },
+        to_return: article_data.to_json
+      )
+      response = request.call(sort_dir: :desc)
       expect(response).to eq(article_data)
     end
   end
